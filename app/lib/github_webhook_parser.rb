@@ -39,6 +39,7 @@ module GitHubWebhookParser
     @issue_id = @payload.dig('issue', 'number')
     @issue_title = @payload.dig('issue', 'title')
     @issue_body = @payload.dig('issue', 'body')
+    @issue_author = @payload.dig('issue', 'user', 'login')
     @repo = @payload.dig('repository', 'full_name')
 
     @context = OpenStruct.new(
@@ -47,6 +48,7 @@ module GitHubWebhookParser
       issue_id: @issue_id,
       issue_title: @issue_title,
       issue_body: @issue_body,
+      issue_author: @issue_author,
       message: @message,
       repo: @repo,
       sender: @sender,
