@@ -18,6 +18,7 @@ class HelpResponder < Responder
     active_responders.each do |r|
       if r.description.is_a? Array
         r.description.zip(r.example_invocation).each do |d_and_ex|
+          puts "#{d_and_ex}"
           descriptions_and_examples << [d_and_ex[0], d_and_ex[1]]
         end
       else
