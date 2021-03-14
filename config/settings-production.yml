@@ -3,8 +3,6 @@ buffy:
     bot_github_user: <%= ENV['BUFFY_BOT_GH_USER'] %>
     gh_access_token: <%= ENV['BUFFY_GH_ACCESS_TOKEN'] %>
     gh_secret_token: <%= ENV['BUFFY_GH_SECRET_TOKEN'] %>
-  teams:
-    editors: 3824115
   responders:
     help:
     hello:
@@ -16,9 +14,8 @@ buffy:
           command: code of conduct
           description: Show our community Code of Conduct and Guidelines
           messages:
-            - "Our CoC: https://github.com/openjournals/joss/blob/master/CODE_OF_CONDUCT.md"
-            - "It's adapted from the Contributor Covenant: http://contributor-covenant.org"
-            - "Reports of abusive or harassing behavior may be reported to reports@theoj.org"
+            - "Our CoC: https://www.scipy2021.scipy.org/code-of-conduct"
+            - "Reports of abusive or harassing behavior may be reported to scipy@enthought.com"
       - editor_list:
           command: list editors
           description: List all current topic editors
