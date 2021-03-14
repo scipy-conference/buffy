@@ -10,19 +10,19 @@ class HelpResponder < Responder
   end
 
   def process_message(message)
-    puts "has message: #{message}"
     descriptions_and_examples = []
     visible_responders = ResponderRegistry.new(@settings).responders.select {|r| !r.hidden? }
     puts "visible responders: #{visible_responders}"
     comment_responders = visible_responders.select{|r| r.responds_on?(context)}
-    puts "comment responders: #{comment_responders}"
-    active_responders = comment_responders.select {|r| r.authorized?(context)}
-    puts "active responders: #{active_responders}"
+    # TODO is this broken?
+    # active_responders = comment_responders.select {|r| r.authorized?(context)}
+    active_responders = comment_responders
 
     active_responders.each do |r|
+      puts "responder: #{r}"
       if r.description.is_a? Array
         r.description.zip(r.example_invocation).each do |d_and_ex|
-          puts "responder: #{d_and_ex}"
+          puts "details: #{d_and_ex}"
           descriptions_and_examples << [d_and_ex[0], d_and_ex[1]]
         end
       else
