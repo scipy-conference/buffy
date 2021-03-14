@@ -10,6 +10,7 @@ class HelloResponder < Responder
   end
 
   def process_message(message)
+    puts "saying hi"
     respond("Hi!")
   end
 

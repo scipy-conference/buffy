@@ -12,6 +12,7 @@ class Buffy < Sinatra::Base
 
   post '/dispatch' do
     responders.respond(@message, @context)
+    puts "#{@context}"
     halt 200, "Message processed"
   end
 

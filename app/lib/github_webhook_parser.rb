@@ -10,6 +10,7 @@ module GitHubWebhookParser
       @payload = JSON.parse(request.body.read)
       @event = request.get_header 'HTTP_X_GITHUB_EVENT'
     rescue JSON::ParserError
+      puts "Malformed request"
       halt 400, 'Malformed request'
     end
 
@@ -19,15 +20,19 @@ module GitHubWebhookParser
     @action = @payload['action']
 
     if @event == 'issues'
+      puts "found issue"
       @message = @payload.dig('issue', 'body')
     elsif @event == 'issue_comment'
+      puts "found issue comment"
       @message = @payload.dig('comment', 'body')
     else
+      puts "Event discarded"
       halt 200, "Event discarded"
     end
 
     @sender = @payload.dig('sender', 'login')
     if @sender == settings.buffy[:env][:bot_github_user]
+      puts "Event origin discarded"
       halt 200, "Event origin discarded"
     end
 
