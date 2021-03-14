@@ -108,9 +108,12 @@ class Responder
   # and all conditions from settings are met
   # then process_message is called
   def call(message, buffy_context)
+    puts "responds on: #{responds_on?(buffy_context)}"
     return false unless responds_on?(buffy_context)
+    puts "responds to: #{responds_to?(message)}"
     return false unless responds_to?(message)
     @context = buffy_context
+    puts "authorized to: #{authorized?(buffy_context)}"
     if authorized?(buffy_context)
       process_message(message) if meet_conditions?
     else

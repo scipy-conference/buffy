@@ -18,7 +18,6 @@ class ResponderRegistry
   def respond(message, context)
     responders.each do |responder|
       begin
-        puts "mapping call to #{responder}"
         responder.call(message, context)
       rescue => err
         log_error(responder, err)
