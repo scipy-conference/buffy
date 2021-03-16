@@ -3,6 +3,8 @@ buffy:
     bot_github_user: <%= ENV['BUFFY_BOT_GH_USER'] %>
     gh_access_token: <%= ENV['BUFFY_GH_ACCESS_TOKEN'] %>
     gh_secret_token: <%= ENV['BUFFY_GH_SECRET_TOKEN'] %>
+  teams:
+    editors: scipy-conference/proceedings
   responders:
     help:
     hello:
@@ -16,10 +18,6 @@ buffy:
           messages:
             - "Our CoC: https://www.scipy2021.scipy.org/code-of-conduct"
             - "Reports of abusive or harassing behavior may be reported to scipy@enthought.com"
-      - editor_list:
-          command: list editors
-          description: List all current topic editors
-          template_file: editors.md
     assign_reviewer_n:
       only: editors
       if:
