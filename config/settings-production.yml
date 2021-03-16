@@ -49,21 +49,18 @@ buffy:
           only: editors
           sample_value: "10.21105/joss.12345"
     label_command:
-      - review_ok:
+      - ready:
           only: editors
-          command: review successful
+          command: mark ready
           add_labels:
-            - reviewed
-            - recommend publication
-            - pending publication
+            - ready
           remove_labels:
-            - ongoing
-            - pending review
-      - review_nok:
+            - pending comment
+      - not_ready:
           only: editors
-          command: review failed
+          command: mark not ready
           add_labels:
-            - recommend rejection
+            - not ready
     welcome_template:
       template_file: welcome.md
       data_from_issue:
