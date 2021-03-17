@@ -27,7 +27,7 @@ buffy:
       no_reviewer_text: "TBD"
     list_of_values:
       - reviewers:
-          only: editors
+          # only: editors
           sample_value: "@username"
           add_as_assignee: true
     assign_editor:
@@ -50,14 +50,14 @@ buffy:
           sample_value: "10.21105/joss.12345"
     label_command:
       - ready:
-          only: editors
+          # only: editors
           command: mark ready
           add_labels:
             - ready
           remove_labels:
             - pending comment
       - not_ready:
-          only: editors
+          # only: editors
           command: mark not ready
           add_labels:
             - not ready
