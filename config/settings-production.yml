@@ -55,12 +55,21 @@ buffy:
           add_labels:
             - ready
           remove_labels:
-            - pending comment
+            - pending-comment
+            - unready
       - not_ready:
           # only: editors
           command: mark not ready
           add_labels:
-            - not ready
+            - unready
+      - server_fail:
+          command: mark server fail
+          add_labels:
+            - does_not_build:server
+      - server_success:
+          command: mark server success
+          remove_labels:
+            - does_not_build:server
     welcome_template:
       template_file: welcome.md
       data_from_issue:
