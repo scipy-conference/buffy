@@ -5,7 +5,7 @@ buffy:
     gh_secret_token: <%= ENV['BUFFY_GH_SECRET_TOKEN'] %>
   teams:
     editors:
-      - deniederhut
+      # - deniederhut
       - mepa
       - cbcunc
       - stargaser
