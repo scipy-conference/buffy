@@ -36,7 +36,11 @@ describe ExternalServiceWorker do
 
     it "should respond error message if a 400 or 500 response is received" do
       expect(Faraday).to receive(:post).and_return(response_400)
-      expect(@worker).to receive(:respond).with("Error. The tests service is currently unavailable")
+      expect(@worker).to receive(:respond).with("Error (400). The tests service is currently unavailable")
+      @worker.perform(@service_params, @locals)
+
+      expect(Faraday).to receive(:post).and_return(OpenStruct.new(status: 500))
+      expect(@worker).to receive(:respond).with("Error (500). The tests service is currently unavailable")
       @worker.perform(@service_params, @locals)
     end
 
@@ -95,6 +99,20 @@ describe ExternalServiceWorker do
       expect(Faraday).to receive(:post).with(expected_url, expected_params, expected_headers).and_return(@null_response)
 
       @worker.perform(params, @locals)
+    end
+  end
+
+  describe "#parse_json_response" do
+    before { @worker = ExternalServiceWorker.new }
+
+    it "parses a JSON response" do
+      response = '{"number":42}'
+      expect(@worker.parse_json_response(response)).to eq({'number' => 42})
+    end
+
+    it "parses first element if response body is an array" do
+      response = "[\"{\\\"number\\\":42}\", \"whatever\", 1234567]"
+      expect(@worker.parse_json_response(response)).to eq({'number' => 42})
     end
   end
 end
