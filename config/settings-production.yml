@@ -54,7 +54,7 @@ buffy:
           sample_value: "10.21105/joss.12345"
     label_command:
       - ready:
-          # only: editors
+          only: editors
           command: mark ready
           add_labels:
             - ready
@@ -62,7 +62,7 @@ buffy:
             - pending-comment
             - unready
       - not_ready:
-          # only: editors
+          only: editors
           command: mark not ready
           add_labels:
             - unready
