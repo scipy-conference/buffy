@@ -66,7 +66,8 @@ class ResponderRegistry
         responder_class = Object.const_get(name)
         available_responders[responder_class.key] = responder_class
       rescue NameError => err
-        logger.warn("There is a mismatch in a Responder class name/module: #{err.message}")
+        puts "There is a mismatch in a Responder class name/module: #{err.message}"
+        # logger.warn("There is a mismatch in a Responder class name/module: #{err.message}")
       end
     end
 
@@ -74,7 +75,8 @@ class ResponderRegistry
   end
 
   def log_error(responder, error)
-    logger.warn("Error calling #{responder.class}: #{error.message}")
+    puts "Error calling #{responder.class}: #{error.message}")
+    # logger.warn("Error calling #{responder.class}: #{error.message}")
   end
 
   def logger
