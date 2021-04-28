@@ -75,8 +75,7 @@ class ResponderRegistry
   end
 
   def log_error(responder, error)
-    puts "Error calling #{responder.class}: #{error.message}")
-    # logger.warn("Error calling #{responder.class}: #{error.message}")
+    logger.warn("Error calling #{responder.class}: #{error.message}")
   end
 
   def logger
