@@ -5,8 +5,6 @@ class BuildPaperResponder < Responder
   keyname :build_paper
 
   def define_listening
-    required_params :command
-
     @event_action = "issue_comment.created"
     @event_regex = /\A@#{bot_name}\s*build\s*paper\s*\z/i
     @procbuild_url = @env[:procbuild_url]
