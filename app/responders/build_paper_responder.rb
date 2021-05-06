@@ -13,11 +13,17 @@ class BuildPaperResponder < Responder
   def process_message(message)
     respond("building paper...")
     # first we need the user and branch info
+    puts "locals are #{locals}"
     url = locals[:issue][:pull_request][:url]
+    puts "url is #{url}"
     response = Faraday.get(url)
+    puts "response is #{response}"
     user = locals[:issue][:user][:login]
+    puts "user is #{user}"
     branch = response[:head][:ref]
+    puts "branch is #{branch}"
     # then we can construct the build url
+    puts "params are #{params}"
     params[:url] = "#{procbuild_url}/#{user}-#{branch}"
     # and call the service
     ExternalServiceWorker.perform_async(params, locals)
