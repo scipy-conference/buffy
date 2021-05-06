@@ -20,10 +20,11 @@ class BuildPaperResponder < Responder
     # url = context.payload[:issue][:pull_request][:url]
     puts "url is #{url}"
     response = Faraday.get(url)
-    puts "response is #{response}"
-    user = context.payload[:issue][:user][:login]
+    data = JSON.parse response.body
+    puts "response json is #{data}"
+    user = context.payload.dig("issue", "user", "login")
     puts "user is #{user}"
-    branch = response[:head][:ref]
+    branch = data["head"]["url"]
     puts "branch is #{branch}"
     # then we can construct the build url
     puts "params are #{params}"
