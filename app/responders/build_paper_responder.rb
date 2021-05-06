@@ -24,11 +24,11 @@ class BuildPaperResponder < Responder
     puts "response json is #{data}"
     user = context.payload.dig("issue", "user", "login")
     puts "user is #{user}"
-    branch = data["head"]["url"]
+    branch = data["head"]["ref"]
     puts "branch is #{branch}"
     # then we can construct the build url
     puts "params are #{params}"
-    params[:url] = "#{procbuild_url}/#{user}-#{branch}"
+    params[:url] = "#{@procbuild_url}/#{user}-#{branch}"
     # and call the service
     ExternalServiceWorker.perform_async(params, locals)
   end
