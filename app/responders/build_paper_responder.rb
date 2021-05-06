@@ -14,11 +14,14 @@ class BuildPaperResponder < Responder
     respond("building paper...")
     # first we need the user and branch info
     puts "locals are #{locals}"
-    url = locals[:issue][:pull_request][:url]
+    # TODO how do we get the whole payload here?
+    puts "context is #{context}"
+    url = context.payload.dig("issue", "pull_request", "url")
+    # url = context.payload[:issue][:pull_request][:url]
     puts "url is #{url}"
     response = Faraday.get(url)
     puts "response is #{response}"
-    user = locals[:issue][:user][:login]
+    user = context.payload[:issue][:user][:login]
     puts "user is #{user}"
     branch = response[:head][:ref]
     puts "branch is #{branch}"

@@ -53,7 +53,7 @@ module GitHubWebhookParser
       repo: @repo,
       sender: @sender,
       event_action: "#{@event}.#{@action}",
-      #payload: @payload
+      payload: @payload
     )
   end
 
