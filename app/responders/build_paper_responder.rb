@@ -13,24 +13,23 @@ class BuildPaperResponder < Responder
   def process_message(message)
     respond("building paper...")
     # first we need the user and branch info
-    puts "locals are #{locals}"
+    # puts "locals are #{locals}"
     # TODO how do we get the whole payload here?
-    puts "context is #{context}"
+    # puts "context is #{context}"
     url = context.payload.dig("issue", "pull_request", "url")
     # url = context.payload[:issue][:pull_request][:url]
-    puts "url is #{url}"
+    # puts "url is #{url}"
     response = Faraday.get(url)
     data = JSON.parse response.body
-    puts "response json is #{data}"
+    # puts "response json is #{data}"
     user = context.payload.dig("issue", "user", "login")
-    puts "user is #{user}"
+    # puts "user is #{user}"
     branch = data["head"]["ref"]
-    puts "branch is #{branch}"
+    # puts "branch is #{branch}"
     # then we can construct the build url
-    params[:url] = "#{@procbuild_url}/build/#{user}-#{branch}"
-    puts "params are #{params}"
+    url = "#{@procbuild_url}/build/#{user}-#{branch}"
     # and call the service
-    response = Faraday.post(url)
+    response = Faraday.get(url)
     data = JSON.parse response.body
     puts "procbuild response is #{data}"
     # ExternalServiceWorker.perform_async(params, locals)
