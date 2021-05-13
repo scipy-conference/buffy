@@ -24,10 +24,11 @@ class BuildPaperResponder < Responder
     # puts "response json is #{data}"
     user = context.payload.dig("issue", "user", "login")
     # puts "user is #{user}"
-    branch = data["head"]["ref"]
+    branch = data["head"]["ref"].gsub("/", "-")
     # puts "branch is #{branch}"
     # then we can construct the build url
     url = "#{@procbuild_url}/build/#{user}-#{branch}"
+    puts "url is #{url}"
     # and call the service
     response = Faraday.get(url)
     data = JSON.parse response.body
