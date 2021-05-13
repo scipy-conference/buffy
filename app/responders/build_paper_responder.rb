@@ -34,7 +34,8 @@ class BuildPaperResponder < Responder
     data = JSON.parse response.body
     puts "procbuild response is #{data}"
     # ExternalServiceWorker.perform_async(params, locals)
-    respond("#{data["info"]}")
+    # TODO make this look nicer
+    respond("#{data}")
   end
 
   def description
