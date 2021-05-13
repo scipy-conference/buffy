@@ -27,10 +27,14 @@ class BuildPaperResponder < Responder
     branch = data["head"]["ref"]
     puts "branch is #{branch}"
     # then we can construct the build url
+    params[:url] = "#{@procbuild_url}/build/#{user}-#{branch}"
     puts "params are #{params}"
-    params[:url] = "#{@procbuild_url}/#{user}-#{branch}"
     # and call the service
-    ExternalServiceWorker.perform_async(params, locals)
+    response = Faraday.post(url)
+    data = JSON.parse response.body
+    puts "procbuild response is #{data}"
+    # ExternalServiceWorker.perform_async(params, locals)
+    respond("#{data["info"]}")
   end
 
   def description
