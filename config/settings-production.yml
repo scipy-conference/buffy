@@ -1,6 +1,6 @@
 buffy:
   env:
-    procbuild_url: "http://procbuild.scipy.org"
+    procbuild_url: "https://procbuild.scipy.org"
     bot_github_user: <%= ENV['BUFFY_BOT_GH_USER'] %>
     gh_access_token: <%= ENV['BUFFY_GH_ACCESS_TOKEN'] %>
     gh_secret_token: <%= ENV['BUFFY_GH_SECRET_TOKEN'] %>
@@ -32,7 +32,7 @@ buffy:
       no_reviewer_text: "TBD"
     list_of_values:
       - reviewers:
-          # only: editors
+          only: editors
           sample_value: "@username"
           add_as_assignee: true
     assign_editor:
@@ -45,6 +45,8 @@ buffy:
     add_remove_assignee:
       only: editors
     build_paper:
+        data_from_issue:
+          - issue
     check_references:
     repo_checks:
     set_value:
