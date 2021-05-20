@@ -11,7 +11,6 @@ class BuildStatusResponder < Responder
   end
 
   def process_message(message)
-    respond("building paper...")
     # first we need the user and branch info
     url = context.payload.dig("issue", "pull_request", "url")
     response = Faraday.get(url)
