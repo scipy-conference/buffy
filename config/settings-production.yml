@@ -47,6 +47,9 @@ buffy:
     build_paper:
         data_from_issue:
           - issue
+    build_status:
+        data_from_issue:
+          - issue
     check_references:
     repo_checks:
     set_value:
