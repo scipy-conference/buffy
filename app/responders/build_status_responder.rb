@@ -1,8 +1,8 @@
 require_relative '../lib/responder'
 
-class BuildPaperResponder < Responder
+class BuildStatusResponder < Responder
 
-  keyname :build_paper
+  keyname :build_status
 
   def define_listening
     @event_action = "issue_comment.created"
