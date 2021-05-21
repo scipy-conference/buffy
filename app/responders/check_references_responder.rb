@@ -14,9 +14,9 @@ class CheckReferencesResponder < Responder
     response = Faraday.get(url)
     data = JSON.parse response.body
     branch_name_value = data["head"]["ref"]
-    puts "found branch name #{branch_name}"
+    puts "found branch name #{branch_name_value}"
     target_repo_value = data["head"]["repo"]["html_url"]
-    puts "found repo #{repo}"
+    puts "found repo #{target_repo_value}"
     DOIWorker.perform_async(locals, target_repo_value, branch_name_value)
   end
 
