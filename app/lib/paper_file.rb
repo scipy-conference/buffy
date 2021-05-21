@@ -28,6 +28,8 @@ class PaperFile
     # will be reading it from there
     metadata = YAML.load_file(metadata_path) rescue {}
     filename = metadata['bibliography']
+    puts "found bibtex name #{filename}"
+    puts "bibtex name has class #{filename.class}"
     if filename.to_s.strip.empty?
       @bibtex_error = "Bad bibliography entry in the paper's metadata"
     end
@@ -35,7 +37,6 @@ class PaperFile
       @bibtex_error = "Couldn't find bibliography entry in the paper's metadata"
     end
     @bibtex_filename = "#{filename}.bib"
-    puts "found bibtex name #{@bibtex_filename}"
     @bibtext_filename
   end
 
