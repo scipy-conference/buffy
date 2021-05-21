@@ -10,11 +10,14 @@ class CheckReferencesResponder < Responder
   end
 
   def process_message(message)
-    if target_repo_value.empty?
-      respond("I couldn't find the URL for the target repository")
-    else
-      DOIWorker.perform_async(locals, target_repo_value, branch_name_value)
-    end
+    url = context.payload.dig("issue", "pull_request", "url")
+    response = Faraday.get(url)
+    data = JSON.parse response.body
+    branch_name_value = data["head"]["ref"]
+    puts "found branch name #{branch_name}"
+    target_repo_value = data["head"]["repo"]["html_url"]
+    puts "found repo #{repo}"
+    DOIWorker.perform_async(locals, target_repo_value, branch_name_value)
   end
 
   def description

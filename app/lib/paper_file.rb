@@ -20,15 +20,20 @@ class PaperFile
 
   def bibtex_path
     @bibtex_path ||= "#{File.dirname(paper_path)}/#{bibtex_filename}"
+    puts "found bibtex path #{@bibtex_path}"
   end
 
   def bibtex_filename
+    # TODO this is listed in a yaml header in the .rst file -- ideally, we
+    # will be reading it from there
     metadata = YAML.load_file(metadata_path) rescue {}
-    @bibtex_filename = metadata['bibliography']
-    if @bibtex_filename.nil?
+    filename = metadata['bibliography']
+    if filename.nil?
       @bibtex_error = "Couldn't find bibliography entry in the paper's metadata"
     end
-    @bibtex_filename
+    @bibtex_filename = "#{filename}.bib"
+    puts "found bibtex name #{@bibtex_filename}"
+    @bibtext_filename
   end
 
   def metadata_path
@@ -42,15 +47,20 @@ class PaperFile
   def self.find(search_path)
     paper_path = nil
 
-    if Dir.exist? search_path
-      Find.find(search_path).each do |path|
-        if path =~ /paper\.tex$|paper\.md$/
-          paper_path = path
-          break
+    # the example papers are 00_vanderwalt and 00_bibderwalt
+    unless search_path.start_with? "00"
+      if Dir.exist? search_path
+        Find.find(search_path).each do |path|
+          # currently, SciPy only supports restructered text, although hopefully
+          # this will change in the future
+          if path =~ /.*\.rst$/
+            puts "found paper path #{path}"
+            paper_path = path
+            break
+          end
         end
       end
     end
-
     PaperFile.new paper_path
   end
 
