@@ -28,7 +28,7 @@ class PaperFile
     # will be reading it from there, but we'll search near the paper for now
     search_directory = File.dirname(paper_path)
     bibtex_path = nil
-    Find.find(search_path).each do |path|
+    Find.find(search_directory).each do |path|
       if path =~ /.*\.bib$/
         puts "found bibtex name #{path}"
         bibtex_path = path
