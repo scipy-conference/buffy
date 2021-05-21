@@ -28,7 +28,7 @@ class PaperFile
     # will be reading it from there
     metadata = YAML.load_file(metadata_path) rescue {}
     filename = metadata['bibliography']
-    if filename.nil?
+    if filename.nil? || filename.empty?
       @bibtex_error = "Couldn't find bibliography entry in the paper's metadata"
     end
     @bibtex_filename = "#{filename}.bib"
