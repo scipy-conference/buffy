@@ -7,7 +7,7 @@ class WelcomeTemplateResponder < Responder
   def define_listening
     required_params :template_file
 
-    @event_action = "pulls.opened"
+    @event_action = "pull_request.opened"
     @event_regex = nil
   end
 

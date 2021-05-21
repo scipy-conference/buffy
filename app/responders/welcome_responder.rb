@@ -5,7 +5,7 @@ class WelcomeResponder < Responder
   keyname :welcome
 
   def define_listening
-    @event_action = "pulls.opened"
+    @event_action = "pull_request.opened"
     @event_regex = nil
   end
 
