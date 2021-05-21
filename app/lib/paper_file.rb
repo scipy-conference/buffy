@@ -19,7 +19,7 @@ class PaperFile
   end
 
   def bibtex_path
-    @bibtex_path ||= "#{File.dirname(paper_path)}/#{bibtex_filename}"
+    @bibtex_path ||= "#{File.dirname(paper_path)}/#{@bibtex_filename}"
     puts "found bibtex path #{@bibtex_path}"
   end
 
@@ -28,7 +28,10 @@ class PaperFile
     # will be reading it from there
     metadata = YAML.load_file(metadata_path) rescue {}
     filename = metadata['bibliography']
-    if filename.nil? || filename.empty?
+    if filename.to_s.strip.empty?
+      @bibtex_error = "Bad bibliography entry in the paper's metadata"
+    end
+    if filename.nil?
       @bibtex_error = "Couldn't find bibliography entry in the paper's metadata"
     end
     @bibtex_filename = "#{filename}.bib"
