@@ -25,18 +25,19 @@ class PaperFile
 
   def bibtex_filename
     # TODO this is listed in a yaml header in the .rst file -- ideally, we
-    # will be reading it from there
-    metadata = YAML.load_file(metadata_path) rescue {}
-    filename = metadata['bibliography']
-    puts "found bibtex name #{filename}"
-    puts "bibtex name has class #{filename.class}"
-    if filename.to_s.strip.empty?
-      @bibtex_error = "Bad bibliography entry in the paper's metadata"
+    # will be reading it from there, but we'll search near the paper for now
+    search_directory = File.dirname(paper_path)
+    bibtex_path = nil
+    Find.find(search_path).each do |path|
+      if path =~ /.*\.bib$/
+        puts "found bibtex name #{path}"
+        bibtex_path = path
+      end
     end
-    if filename.nil?
-      @bibtex_error = "Couldn't find bibliography entry in the paper's metadata"
+    if bibtex_path.nil?
+      @bibtex_error = "Couldn't find bibliography entry"
     end
-    @bibtex_filename = "#{filename}.bib"
+    @bibtex_filename = bibtex_path
     @bibtext_filename
   end
 
