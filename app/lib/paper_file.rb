@@ -19,7 +19,7 @@ class PaperFile
   end
 
   def bibtex_path
-    @bibtex_path ||= "#{File.dirname(paper_path)}/#{@bibtex_filename}"
+    @bibtex_path ||= "#{File.dirname(paper_path)}/#{bibtex_filename}"
     puts "found bibtex path #{@bibtex_path}"
   end
 
