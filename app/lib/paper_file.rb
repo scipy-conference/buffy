@@ -13,6 +13,9 @@ class PaperFile
   def bibtex_entries
     path = bibtex_path()
     puts "reading file #{path}"
+    if path.nil?
+      return
+    end
     @bibtex_entries ||= BibTeX.open(path, filter: :latex).data
     @bibtex_entries.keep_if { |entry| !entry.comment? && !entry.preamble? && !entry.string? }
   rescue BibTeX::ParseError => e
@@ -33,7 +36,6 @@ class PaperFile
     end
     if bibtex_path.nil?
       @bibtex_error = "Couldn't find bibliography entry"
-      respond @bibtex_error
     end
     @bibtex_filename = bibtex_path
     bibtex_path
