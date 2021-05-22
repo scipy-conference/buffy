@@ -19,10 +19,6 @@ class PaperFile
   end
 
   def bibtex_path
-    bibtext_filename
-  end
-
-  def bibtex_filename
     # TODO this is listed in a yaml header in the .rst file -- ideally, we
     # will be reading it from there, but we'll search near the paper for now
     search_directory = File.dirname(paper_path)
