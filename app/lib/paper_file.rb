@@ -54,7 +54,7 @@ class PaperFile
     if Dir.exist? search_path
       Find.find(search_path).each do |path|
         # the example papers are 00_vanderwalt and 00_bibderwalt
-        unless path.include? "00_vanderwalt" || path.include? "00_bibderwalt"
+        unless path.include?("00_vanderwalt") || path.include?("00_bibderwalt")
           # currently, SciPy only supports restructered text, although hopefully
           # this will change in the future
           if path =~ /.*\.rst$/
