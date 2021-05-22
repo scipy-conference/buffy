@@ -19,8 +19,7 @@ class PaperFile
   end
 
   def bibtex_path
-    @bibtex_path ||= "#{File.dirname(paper_path)}/#{bibtex_filename}"
-    puts "found bibtex path #{@bibtex_path}"
+    bibtext_filename
   end
 
   def bibtex_filename
@@ -52,10 +51,10 @@ class PaperFile
   def self.find(search_path)
     paper_path = nil
 
-    # the example papers are 00_vanderwalt and 00_bibderwalt
-    unless search_path.start_with? "00"
-      if Dir.exist? search_path
-        Find.find(search_path).each do |path|
+    if Dir.exist? search_path
+      Find.find(search_path).each do |path|
+        # the example papers are 00_vanderwalt and 00_bibderwalt
+        unless path.include? "00_vanderwalt" || path.include? "00_bibderwalt"
           # currently, SciPy only supports restructered text, although hopefully
           # this will change in the future
           if path =~ /.*\.rst$/
