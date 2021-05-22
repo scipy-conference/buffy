@@ -33,6 +33,7 @@ class PaperFile
     end
     if bibtex_path.nil?
       @bibtex_error = "Couldn't find bibliography entry"
+      respond @bibtex_error
     end
     @bibtex_filename = bibtex_path
     bibtex_path
