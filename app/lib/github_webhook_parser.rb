@@ -22,12 +22,24 @@ module GitHubWebhookParser
     if @event == 'issues'
       puts "found issue"
       @message = @payload.dig('issue', 'body')
+      @issue_id = @payload.dig('issue', 'number')
+      @issue_title = @payload.dig('issue', 'title')
+      @issue_body = @payload.dig('issue', 'body')
+      @issue_author = @payload.dig('issue', 'user', 'login')
     elsif @event == 'issue_comment'
       puts "found issue comment"
       @message = @payload.dig('comment', 'body')
+      @issue_id = @payload.dig('issue', 'number')
+      @issue_title = @payload.dig('issue', 'title')
+      @issue_body = @payload.dig('issue', 'body')
+      @issue_author = @payload.dig('issue', 'user', 'login')
     elsif @event == 'pull_request'
       puts "found pull request"
       @message = @payload.dig('pull_request', 'body')
+      @issue_id = @payload.dig('pull_request', 'number')
+      @issue_title = @payload.dig('pull_request', 'title')
+      @issue_body = @payload.dig('pull_request', 'body')
+      @issue_author = @payload.dig('pull_request', 'user', 'login')
     else
       puts "Event discarded"
       halt 200, "Event discarded"
@@ -39,10 +51,6 @@ module GitHubWebhookParser
       halt 200, "Event origin discarded"
     end
 
-    @issue_id = @payload.dig('issue', 'number')
-    @issue_title = @payload.dig('issue', 'title')
-    @issue_body = @payload.dig('issue', 'body')
-    @issue_author = @payload.dig('issue', 'user', 'login')
     @repo = @payload.dig('repository', 'full_name')
 
     @context = OpenStruct.new(
