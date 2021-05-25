@@ -25,6 +25,9 @@ module GitHubWebhookParser
     elsif @event == 'issue_comment'
       puts "found issue comment"
       @message = @payload.dig('comment', 'body')
+    elsif @event == 'pull_request'
+      puts "found pull request"
+      @message = @payload.dig('pull_request', 'body')
     else
       puts "Event discarded"
       halt 200, "Event discarded"
