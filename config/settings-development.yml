@@ -1,38 +1,166 @@
 buffy:
   env:
-    bot_github_user: <%= ENV['BUFFY_BOT_GH_USER'] || 'botsci' %>
+    procbuild_url: "https://procbuild.scipy.org"
+    bot_github_user: <%= ENV['BUFFY_BOT_GH_USER'] %>
+    gh_access_token: <%= ENV['BUFFY_GH_ACCESS_TOKEN'] %>
+    gh_secret_token: <%= ENV['BUFFY_GH_SECRET_TOKEN'] %>
   teams:
-    editors: 3824115
-    eics:
-    reviewers:
+    editors:
+      - deniederhut
+      - mepa
+      - cbcunc
+      - stargaser
   responders:
     help:
     hello:
       hidden: true
     thanks:
       hidden: true
+    basic_command:
+      - code_of_conduct:
+          command: code of conduct
+          description: Show our community Code of Conduct and Guidelines
+          messages:
+            - "Our CoC: https://www.scipy2021.scipy.org/code-of-conduct"
+            - "Reports of abusive or harassing behavior may be reported to scipy@enthought.com"
     assign_reviewer_n:
       only: editors
+      if:
+        role_assigned: editor
     remove_reviewer_n:
       only: editors
       no_reviewer_text: "TBD"
+    list_of_values:
+      - reviewers:
+          only: editors
+          sample_value: "@username"
+          add_as_assignee: true
     assign_editor:
       only: editors
     remove_editor:
       only: editors
       no_editor_text: "TBD"
-    invite:
-      only: editors
+    # invite:
+    #   only: editors
     add_remove_assignee:
       only: editors
-    set_value:
-      name: version
-      only: editors
+    build_paper:
+        data_from_issue:
+          - issue
+    build_status:
+        data_from_issue:
+          - issue
+    check_references:
+    # repo_checks:
+    # set_value:
+    #   - version:
+    #       only: editors
+    #       sample_value: "v1.0.0"
+    #   - archive:
+    #       only: editors
+    #       sample_value: "10.21105/joss.12345"
     label_command:
-      command: review successful
-      add_labels:
-        - reviewed
-        - pending publication
-      remove_labels:
-        - pending review
+      - paper:
+          command: mark paper
+          add_labels:
+            - paper
+      - needs_review:
+          only: editors
+          command: mark needs review
+          add_labels:
+            - needs-review
+          remove_labels:
+            - unready
+            - needs-more-review
+            - pending-comment
+            - ready
+      - needs_more_review:
+          only: editors
+          command: mark needs more review
+          add_labels:
+            - needs-more-review
+          remove_labels:
+            - unready
+            - needs-review
+            - pending-comment
+            - ready
+      - pending_comment:
+          only: editors
+          command: mark pending comment
+          add_labels:
+            - pending-comment
+          remove_labels:
+            - unready
+            - needs-review
+            - needs-more-review
+            - ready
+      - ready:
+          only: editors
+          command: mark ready
+          add_labels:
+            - ready
+          remove_labels:
+            - unready
+            - needs-review
+            - needs-more-review
+            - pending-comment
+      - not_ready:
+          only: editors
+          command: mark not ready
+          add_labels:
+            - unready
+          remove_labels:
+            - needs-review
+            - needs-more-review
+            - pending-comment
+            - ready
+      - server_fail:
+          command: mark server fail
+          add_labels:
+            - does_not_build:server
+      - server_success:
+          command: mark server success
+          remove_labels:
+            - does_not_build:server
     welcome:
+    # welcome_template:
+    #   template_file: welcome.md
+    #   data_from_issue:
+    #     - repository
+    # close_issue_command:
+    #   only: editors
+    #   command: reject
+    #   add_labels:
+    #     - rejected
+    # external_service:
+    #   - code_quality:
+    #       only: editors
+    #       command: analyze code
+    #       description: Reports on the quality of the code
+    #       message: Inspecting code...
+    #       url: https://dummy-external-service.herokuapp.com/code-analysis
+    #       method: post
+    #       query_params:
+    #         secret: A1234567890Z
+    #       data_from_issue:
+    #         - target-repository
+    #       mapping:
+    #         target_url: target-repository
+    #       headers:
+    #         Authorization: OAUTH-token 123456
+    #         Time-Zone: Europe/Amsterdam
+    #   - cat_facts:
+    #       command: tell me something about cats
+    #       description: Random facts about cats
+    #       url: "https://cat-fact.herokuapp.com/facts/random"
+    #       method: get
+    #       query_params:
+    #           animal_type: cat
+    #           amount: 1
+    #       template_file: cats.md
+    # add_remove_checklist:
+    #   only: editors
+    #   template_file: reviewer_checklist.md
+    #   data_from_issue:
+    #     - target-repository
+    #     - author-handle

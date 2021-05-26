@@ -40,8 +40,8 @@ buffy:
     remove_editor:
       only: editors
       no_editor_text: "TBD"
-    invite:
-      only: editors
+    # invite:
+    #   only: editors
     add_remove_assignee:
       only: editors
     build_paper:
