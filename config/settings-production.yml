@@ -23,13 +23,13 @@ buffy:
           messages:
             - "Our CoC: https://www.scipy2021.scipy.org/code-of-conduct"
             - "Reports of abusive or harassing behavior may be reported to scipy@enthought.com"
-    assign_reviewer_n:
-      only: editors
-      if:
-        role_assigned: editor
-    remove_reviewer_n:
-      only: editors
-      no_reviewer_text: "TBD"
+    # assign_reviewer_n:
+    #   only: editors
+    #   if:
+    #     role_assigned: editor
+    # remove_reviewer_n:
+    #   only: editors
+    #   no_reviewer_text: "TBD"
     list_of_values:
       - reviewers:
           only: editors
