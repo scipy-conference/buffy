@@ -17,8 +17,9 @@ class BuildStatusResponder < Responder
     data = JSON.parse response.body
     user = context.payload.dig("issue", "user", "login")
     branch = data["head"]["ref"].gsub("/", "-")
+    owner = data["head"]["repo"]["owner"]["login"]
     # then we can construct the paper status url
-    url = "#{@procbuild_url}/status/#{user}-#{branch}"
+    url = "#{@procbuild_url}/status/#{owner}-#{branch}"
     # and ping procbuild
     response = Faraday.get(url)
     data = JSON.parse response.body

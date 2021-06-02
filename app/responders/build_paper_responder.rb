@@ -25,9 +25,10 @@ class BuildPaperResponder < Responder
     user = context.payload.dig("issue", "user", "login")
     # puts "user is #{user}"
     branch = data["head"]["ref"].gsub("/", "-")
+    owner = data["head"]["repo"]["owner"]["login"]
     # puts "branch is #{branch}"
     # then we can construct the build url
-    url = "#{@procbuild_url}/build/#{user}-#{branch}"
+    url = "#{@procbuild_url}/build/#{owner}-#{branch}"
     puts "url is #{url}"
     # and call the service
     response = Faraday.get(url)
