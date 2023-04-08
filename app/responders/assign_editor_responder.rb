@@ -6,14 +6,14 @@ class AssignEditorResponder < Responder
 
   def define_listening
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} assign (\S+) as editor\s*\z/i
+    @event_regex = /\A@#{bot_name} (assign|add) (\S+) as editor\.?\s*$/i
   end
 
   def process_message(message)
     mark = "<!--editor-->"
     end_mark = "<!--end-editor-->"
 
-    new_editor = @match_data[1]
+    new_editor = @match_data[2]
     new_editor = "@#{context.sender}" if new_editor == "me"
 
     old_editor = read_from_body(mark, end_mark)
@@ -23,14 +23,16 @@ class AssignEditorResponder < Responder
     add_collaborator(new_editor) if add_as_collaborator?
     replace_assignee(old_editor, new_editor) if add_as_assignee?
     respond("Assigned! #{new_editor} is now the editor")
+
+    process_external_service(params[:external_call], locals.merge({editor: new_editor})) if params[:external_call]
     process_labeling
   end
 
-  def description
+  def default_description
     "Assign a user as the editor of this submission"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name} assign @username as editor"
   end
 

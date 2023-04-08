@@ -15,7 +15,8 @@ describe AddAndRemoveAssigneeResponder do
 
     it "should define regex" do
       expect(@responder.event_regex).to match("@botsci add assignee: @arfon")
-      expect(@responder.event_regex).to match("@botsci remove assignee: @arfon   \r\n")
+      expect(@responder.event_regex).to match("@botsci add assignee: @arfon.")
+      expect(@responder.event_regex).to match("@botsci remove assignee: @arfon   \r\n more")
       expect(@responder.event_regex).to_not match("remove assignee: @arfon")
       expect(@responder.event_regex).to_not match("@botsci remove assignee: @arfon and others")
       expect(@responder.event_regex).to_not match("@botsci add assignee @arfon")
@@ -57,7 +58,7 @@ describe AddAndRemoveAssigneeResponder do
 
     context "removing an assignee" do
       before do
-        @msg = "@botsci remove assignee: @arfon"
+        @msg = "@botsci remove assignee: @arfon."
         @responder.match_data = @responder.event_regex.match(@msg)
       end
 

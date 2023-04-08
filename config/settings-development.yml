@@ -123,6 +123,7 @@ buffy:
           remove_labels:
             - does_not_build:server
     welcome:
+      message: "Hi!, I'm @botsci, a friendly bot.\n\nType ```@botsci help``` to discover how I can help you."
     # welcome_template:
     #   template_file: welcome.md
     #   data_from_issue:

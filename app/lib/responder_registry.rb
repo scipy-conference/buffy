@@ -1,7 +1,8 @@
-require 'logger'
+require_relative 'logging'
 Dir["#{File.expand_path '../../responders', __FILE__}/**/*.rb"].sort.each { |f| require f }
 
 class ResponderRegistry
+  include Logging
 
   attr_accessor :responders
   attr_accessor :config
@@ -23,6 +24,32 @@ class ResponderRegistry
         log_error(responder, err)
       end
     end; nil
+
+    reply_for_wrong_command(message, context) unless accept_message?(message)
+  end
+
+  def accept_message?(message)
+    understood = false
+    candidate_responders = responders.select{|responder| responder.event_action == "issue_comment.created" }
+    candidate_responders.each do |responder|
+      if responder.event_regex && responder.event_regex.match?(message)
+        understood = true
+        break
+      end
+    end
+    understood
+  end
+
+  def reply_for_wrong_command(message, context)
+    return unless context.event_action == "issue_comment.created"
+
+    params = Sinatra::IndifferentHash[]
+    params = params.merge(config[:responders][:wrong_command]) if config[:responders][:wrong_command].is_a?(Hash)
+
+    wrong_command_context = context.dup
+    wrong_command_context.event_action = "wrong_command"
+
+    WrongCommandResponder.new(config, params).call(message, wrong_command_context)
   end
 
   def add_responder(responder)
@@ -74,11 +101,30 @@ class ResponderRegistry
     available_responders
   end
 
-  def log_error(responder, error)
-    logger.warn("Error calling #{responder.class}: #{error.message}")
+  # Get an instance of one of the responders in the configuration
+  def self.get_responder(config={}, responder_key=nil, responder_name=nil)
+    return nil if config.empty?
+    return nil if responder_key.nil?
+    return nil unless config[:responders].keys.include?(responder_key)
+
+    key = nil
+    responder_params = config[:responders][responder_key] || {}
+
+    if responder_name && responder_params.is_a?(Array)
+      if responder_instance = responder_params.select {|r| r.keys.first.to_s == responder_name.to_s}.first
+        key = responder_key
+        params = responder_instance[responder_name] || {}
+        params = Sinatra::IndifferentHash[name: responder_name.to_s].merge(params)
+      end
+    elsif responder_name.nil? && responder_params.is_a?(Hash)
+      key = responder_key
+      params = responder_params
+    end
+
+    return key.nil? ? nil : ResponderRegistry.available_responders[key.to_s].new(config, params)
   end
 
-  def logger
-    @logger ||= Logger.new(STDOUT)
+  def log_error(responder, error)
+    logger.warn("Error calling #{responder.class}: #{error.message}")
   end
 end

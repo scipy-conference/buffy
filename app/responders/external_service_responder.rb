@@ -8,19 +8,20 @@ class ExternalServiceResponder < Responder
     required_params :name, :command, :url
 
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} #{command}\s*\z/i
+    @event_regex = /\A@#{bot_name} #{command}\.?\s*$/i
   end
 
   def process_message(message)
     respond(params[:message]) if params[:message]
-    ExternalServiceWorker.perform_async(params, locals)
+
+    ExternalServiceWorker.perform_async(serializable(params), serializable(locals))
   end
 
-  def description
-    params[:description] || "Calls external service"
+  def default_description
+    "Calls external service"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name} #{command}"
   end
 end
