@@ -12,10 +12,10 @@ class BuildStatusResponder < Responder
 
   def process_message(message)
     # first we need the user and branch info
-    url = context.payload.dig("issue", "pull_request", "url")
+    url = context.raw_payload.dig("issue", "pull_request", "url")
     response = Faraday.get(url)
     data = JSON.parse response.body
-    user = context.payload.dig("issue", "user", "login")
+    user = context.raw_payload.dig("issue", "user", "login")
     branch = data["head"]["ref"].gsub("/", "-")
     owner = data["head"]["repo"]["owner"]["login"]
     # then we can construct the paper status url
