@@ -9,7 +9,6 @@ buffy:
       - deniederhut
       - mepa
       - cbcunc
-      - stargaser
   responders:
     help:
     hello:
@@ -21,7 +20,7 @@ buffy:
           command: code of conduct
           description: Show our community Code of Conduct and Guidelines
           messages:
-            - "Our CoC: https://www.scipy2021.scipy.org/code-of-conduct"
+            - "Our CoC: https://www.scipy2023.scipy.org/code-of-conduct"
             - "Reports of abusive or harassing behavior may be reported to scipy@enthought.com"
     list_of_values:
       - reviewers:
