@@ -1,24 +1,25 @@
 Installation
 ============
 
-Buffy works listening to events received from GitHub and deciding if/how to reply by passing the received payload to different Responders.
-You can fork Buffy and configure the responders you want to use for any specific repository. There is no need for the Buffy fork to be located in the same GitHub user/organization as the repo where it will be used. To have Buffy ready and listening to events you can install it locally or deploy it to a server or service platform.
-You'll need the following components:
+Buffy functions by monitoring events that are sent from a GitHub repository (e.g., openjournals/joss-reviews). Based on the information in these events, Buffy determines whether and how to respond by passing the event data to different [Responders](https://api.rubyonrails.org/v4.1/classes/ActionController/Responder.html).
 
-- A GitHub user to use as the bot with admin permissions on the target repo (usually a member of the organization owning the repo).
+You can fork Buffy and configure the responders you want to use for a particular repository, and the fork doesn't necessarily
+need to be hosted under the same GitHub user or organization (as the repository where it will be used). For Buffy to be operational, it must be running either through a local installation or deployment to a platform. The following components are necessary for this setup:
+
+- A GitHub user with administrative permissions on the target repository (typically a member of the organization that owns the repository) is required to act as the bot.
 - An instance of Buffy running
-- A webhook configured in the GitHub repo's settings to send events to Buffy
+- A webhook configured in the settings of the GitHub repository that will send events to Buffy (e.g., a `reviews` repository).
 
 ### Create the bot GitHub user
 
-This will be the user responding to commands in the reviews repo.
+This will be the "user" responding to the commands issued from a reviews repository.
 
 **1.** [Sign up at GitHub](https://github.com/join) and create the bot user:
 
   ![GitHub's signup page](./images/signup.png "GitHub's signup page")
 
 
-**2.** Go to `Settings >> Developer settings >> Personal access tokens` and create a new token with at least this scopes: `public_repo`, `repo:invite`, `read:org` and `read:user`. Save that token, it will be your `BUFFY_GH_ACCESS_TOKEN`.
+**2.** Go to `Settings >> Developer settings >> Personal access tokens` and create a new token with at least these scopes: `public_repo`, `repo:invite`, `read:org` and `read:user`. Save that token, it will be your `BUFFY_GH_ACCESS_TOKEN`.
 
   ![Settings >> Developer settings >> Personal access tokens](./images/access_token.png "Settings >> Developer settings >> Personal access tokens")
 
@@ -40,13 +41,13 @@ Some applications and services must be available to use by Buffy:
 
 #### Deployment
 
-We will use here [Heroku](https://www.heroku.com) as an example service to deploy Buffy but you can use any other server or platform.
+As an example, we will use [Heroku](https://www.heroku.com) to deploy Buffy. However, any other server or platform can also be used.
 
-**1.** Create a new app in heroku linked to the url of your fork of Buffy. Automatically Heroku will use the `heroku/ruby` buildpack.
+**1.** To begin, create a new app in Heroku linked to the URL of your Buffy fork. Heroku will automatically use the `heroku/ruby` buildpack.
 
-- To process background jobs Buffy needs `redis` installed, several add-ons providing it are available: Heroku Redis, RedisGreen, Redis To Go, etc.
-- To install the `cloc` dependency there's a buildpack for Heroku available [here](https://github.com/openjournals/heroku-buildpack-cloc).
-- Gitinspector can be installed [using npm](https://www.npmjs.com/package/gitinspector). To do so in Heroku, the `heroku/nodejs` buildpack can be added.
+- To process background jobs, Buffy needs a `redis` add-on, such as Heroku Redis or RedisGreen etc.
+- You can use [this Heroku buildpack](https://github.com/openjournals/heroku-buildpack-cloc) to install the `cloc` dependency.
+- You can install Gitinspector using npm by following the instructions [here](https://www.npmjs.com/package/gitinspector). If you plan to deploy to Heroku, you can add the `heroku/nodejs` buildpack to your app.
 
 **2.** In the app settings add the following Config Vars:
 
@@ -55,29 +56,33 @@ We will use here [Heroku](https://www.heroku.com) as an example service to deplo
         BUFFY_GH_SECRET_TOKEN: <a_random_string>
         RACK_ENV: production
 
+**2b.** You can set the Ruby version to install using the CUSTOM_RUBY_VERSION env var. Unless you need any other specific version, please add also a Config Var named CUSTOM_RUBY_VERSION with the value of the latest version listed in the [Buffy tested Ruby versions](https://github.com/openjournals/buffy/blob/main/.github/workflows/tests.yml#L10).
+
+
 **3.** You can set Heroku to automatically redeploy when new commits are added. You can also add heroku as a git remote and deploy manually using
 
         $ git push heroku main
 
   There are detailed instructions in the Deploy section of your Heroku app.
 
-**4.** You should now have a public URL with Buffy running. You can test that pointing your browser to `/status`, like for example: `https://your-new-buffy-deploy.herokuapp.com/status` It should return a simple *up and running* message.
+**4.** At this point, you should have a public URL pointing to your new Buffy app! To confirm this, you can test it by visiting https://your-new-buffy-deploy.herokuapp.com/status. On success, you should see a basic (*up and running*) message confirming that Buffy is up and running.
 
 
 ### Configure a webhook to send events from GitHub to Buffy
 
-**1.** Go to the settings page of the repository where you want to use buffy. Add a new webhook.
+**1.** Navigate to the settings page of the repository that Buffy will be listening to and add a new webhook.
 
   ![Add webhook](./images/new_webhook.png "Add webhook")
 
-**2.** Configure the new webhook with:
+**2.** Set up the new webhook with the following configuration:
 
         Payload URL: /dispatch path at your public buffy url
         Content type: application/json
         Secret: The BUFFY_GH_SECRET_TOKEN you configured in the previous step
 
   Select individual events to trigger: **issue comments** and **issues**
+  
   ![New webhook](./images/webhook.png "New webhook")
 
 
-If everything went well you should have now your bot responding on the reviews issues. Try `@botname help` for example.
+Assuming everything went smoothly, your Buffy instance should now be responding to review issues. You can test this by sending the `@botname help` command from a reviews issue to verify that the bot is functioning as expected.

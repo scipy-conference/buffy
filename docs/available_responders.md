@@ -15,23 +15,30 @@ Buffy includes a list of Responders that can be used by configuring them in the 
    responders/help
    responders/hello
    responders/basic_command
-   responders/assign_reviewer_n
-   responders/remove_reviewer_n
    responders/assign_editor
    responders/remove_editor
+   responders/reviewers_list
    responders/invite
    responders/set_value
    responders/list_of_values
+   responders/list_team_members
    responders/add_remove_assignee
+   responders/reviewer_checklist_comment
    responders/add_remove_checklist
    responders/label_command
    responders/check_references
    responders/repo_checks
    responders/thanks
+   responders/reminders
+   responders/initial_values
    responders/welcome
-   responders/welcome_template
+   responders/goodbye
    responders/close_issue_command
+   responders/update_comment
+   responders/external_start_review
    responders/external_service
+   responders/github_action
+   responders/wrong_command
 ```
 
 ```eval_rst

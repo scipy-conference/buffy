@@ -6,7 +6,7 @@ class HelpResponder < Responder
 
   def define_listening
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} #{help_command}\s*\z/i
+    @event_regex = /\A@#{bot_name} #{help_command}[\.!]?\s*$/i
   end
 
   def process_message(message)
@@ -16,7 +16,7 @@ class HelpResponder < Responder
     comment_responders = visible_responders.select{|r| r.responds_on?(context)}
     # TODO is this broken?
     # active_responders = comment_responders.select {|r| r.authorized?(context)}
-    active_responders = comment_responders
+    active_responders = comment_responders.select {|r| r.context = context; r.authorized?(context) }
 
     active_responders.each do |r|
       puts "responder: #{r}"
@@ -36,11 +36,11 @@ class HelpResponder < Responder
     params[:help_command] || "help"
   end
 
-  def description
+  def default_description
     "List all available commands"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name} #{help_command}"
   end
 end

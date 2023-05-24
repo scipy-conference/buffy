@@ -10,6 +10,8 @@ class Buffy < Sinatra::Base
 
   config_file "../config/settings-#{settings.environment}.yml"
 
+  set :root, File.dirname(__FILE__)
+
   post '/dispatch' do
     puts "#{@context}"
     responders.respond(@message, @context)
@@ -18,5 +20,9 @@ class Buffy < Sinatra::Base
 
   get '/status' do
     "#{settings.buffy[:env][:bot_github_user]} in #{settings.environment}: up and running!"
+  end
+
+  get '/' do
+    "👋🤖"
   end
 end
