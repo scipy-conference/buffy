@@ -8,7 +8,7 @@ class BasicCommandResponder < Responder
     required_params :command
 
     @event_action = "issue_comment.created"
-    @event_regex = /\A@#{bot_name} #{command}\s*\z/i
+    @event_regex = /\A@#{bot_name} #{command}\.?\s*$/i
   end
 
   def process_message(message)
@@ -17,14 +17,15 @@ class BasicCommandResponder < Responder
       params[:messages].each {|msg| respond(msg)}
     end
     respond_external_template(params[:template_file], locals) if params[:template_file]
+    process_external_service(params[:external_call], locals.merge({command: command})) if params[:external_call]
     process_labeling
   end
 
-  def description
-    params[:description] || "Replies to #{command}"
+  def default_description
+    "Replies to #{command}"
   end
 
-  def example_invocation
+  def default_example_invocation
     "@#{bot_name} #{command}"
   end
 end

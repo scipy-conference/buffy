@@ -1,4 +1,5 @@
 require 'octokit'
+require 'faraday'
 
 # This module includes all the methods involving calls to the GitHub API
 # It reuses a memoized Octokit::Client instance
@@ -7,7 +8,19 @@ module GitHub
 
   # Authenticated Octokit
   def github_client
-    @github_client ||= Octokit::Client.new(access_token: @env[:gh_access_token], auto_paginate: true)
+    @github_client ||= Octokit::Client.new(access_token: github_access_token, auto_paginate: true)
+  end
+
+  # GitHub access token
+  def github_access_token
+    @github_access_token ||= env[:gh_access_token]
+  end
+
+  # GitHub API headers
+  def github_headers
+    @github_headers ||= { "Authorization" => "token #{github_access_token}",
+                          "Content-Type" => "application/json",
+                          "Accept" => "application/vnd.github.v3+json" }
   end
 
   # returns the URL for a given template in the repo
@@ -44,6 +57,16 @@ module GitHub
   # List labels of a GitHub issue
   def issue_labels
     github_client.labels_for_issue(context.repo, context.issue_id).map { |l| l[:name] }
+  end
+
+  # Get info on an issue's comment
+  def issue_comment(comment_id)
+    github_client.issue_comment(context.repo, comment_id)
+  end
+
+  # Update a Github comment
+  def update_comment(comment_id, content)
+    github_client.update_comment(context.repo, comment_id, content)
   end
 
   # Update a Github issue
@@ -98,8 +121,36 @@ module GitHub
     github_client.repository_invitations(context.repo).any? { |i| i.invitee.login.downcase == username }
   end
 
+  # Uses the GitHub API to get a user's information
+  def get_user(username)
+    return nil if username.to_s.strip.empty?
+    username = user_login(username)
+    begin
+      github_client.user(username)
+    rescue Octokit::Unauthorized
+      logger.warn("Error calling GitHub API! Bad credentials: TOKEN is invalid")
+      nil
+    rescue Octokit::NotFound
+      nil
+    end
+  end
+
+  # Uses the GitHub API to create a new organization's team.
+  # This require the auth user to be owner in the organization
+  # Returns true if the response status is 201, false otherwise.
+  def add_new_team(org_team_name)
+    org_name, team_name = org_team_name.split('/')
+    begin
+      new_team = github_client.create_team(org_name, { name: team_name, privacy: "closed" })
+    rescue Octokit::ClientError => gh_err
+      logger.warn("Error trying to create team #{org_team_name}: #{gh_err.message}")
+      return false
+    end
+    return new_team
+  end
+
   # Uses the GitHub API to obtain the id of an organization's team
-  def team_id(org_team_name)
+  def api_team_id(org_team_name)
     org_name, team_name = org_team_name.split('/')
     raise "Configuration Error: Invalid team name: #{org_team_name}" if org_name.nil? || team_name.nil?
     begin
@@ -110,17 +161,81 @@ module GitHub
     end
   end
 
+  # Uses the GitHub API to get a list of users in a team
+  def api_team_members(team_id_or_name)
+    case team_id_or_name
+    when Integer
+      team = team_id_or_name
+    when String
+      team = api_team_id(team_id_or_name)
+    else
+      team = nil
+    end
+
+    return [] if team.nil?
+    github_client.team_members(team).collect { |e| e.login }.compact.sort
+  end
+
+  # Send an invitation to a user to join an organization's team using the GitHub API
+  def invite_user_to_team(username, org_team_name)
+    username = user_login(username)
+    invitee = get_user(username)
+    return false if (invitee.nil? || invitee.id.nil?)
+
+    invited_team_id = api_team_id(org_team_name)
+    if invited_team_id.nil?
+      invited_team = add_new_team(org_team_name)
+      invited_team_id = invited_team.id if invited_team
+    end
+    return false unless invited_team_id
+
+    org_name, team_name = org_team_name.split('/')
+
+    if github_client.org_member?(org_name, username)
+      url = "https://api.github.com/orgs/#{org_name}/teams/#{team_name}/memberships/#{username}"
+      response = Faraday.put(url, nil, github_headers)
+    else
+      url = "https://api.github.com/orgs/#{org_name}/invitations"
+      parameters = { invitee_id: invitee.id, team_ids: [invited_team_id] }
+      response = Faraday.post(url, parameters.to_json, github_headers)
+    end
+
+    response.status.between?(200, 299)
+  end
+
+  # Use the GitHub API to trigger a workflow run (GitHub Action)
+  def trigger_workflow(repo, workflow, inputs={}, ref="main")
+    return false if repo.nil? || workflow.nil?
+
+    url = "https://api.github.com/repos/#{repo}/actions/workflows/#{workflow}/dispatches"
+    parameters = { inputs: inputs, ref: ref }
+    response = Faraday.post(url, parameters.to_json, github_headers)
+    response_ok = response.status.to_i == 204
+
+    unless response_ok
+      logger.warn("Error triggering workflow #{workflow} at #{repo}: ")
+      logger.warn("   Response #{response.status}: #{response.body}")
+    end
+
+    response_ok
+  end
+
   # Returns true if the user in a team member of any of the authorized teams
   # false otherwise
   def user_in_authorized_teams?(user_login)
     @user_authorized ||= begin
       authorized = []
-      authorized_team_ids.each do |team_id|
-        authorized << github_client.team_member?(team_id, user_login)
+      authorized_team_ids.each do |t_id|
+        authorized << github_client.team_member?(t_id, user_login)
         break if authorized.compact.any?
       end
       authorized.compact.any?
     end
+  end
+
+  # The url of current issue in the current repo
+  def issue_url
+    "https://github.com/#{context.repo}/issues/#{context.issue_id}"
   end
 
   # The url of the invitations page for the current repo
@@ -128,9 +243,15 @@ module GitHub
     "https://github.com/#{context.repo}/invitations"
   end
 
+  # The url of a comment in the current issue
+  def comment_url(comment_id=nil)
+    comment_id = context.comment_id if comment_id.nil?
+    "https://github.com/#{context.repo}/issues/#{context.issue_id}#issuecomment-#{comment_id}"
+  end
+
   # Returns the user login (removes the @ from the username)
   def user_login(username)
-    username.sub(/^@/, "").downcase
+    username.strip.sub(/^@/, "")
   end
 
   # Returns true if the string is a valid GitHub isername (starts with @)
@@ -148,7 +269,7 @@ module GitHub
         if id_or_slug.is_a? String
           org_slug, team_slug = id_or_slug.split('/')
           raise "Configuration Error: Invalid team name: #{id_or_slug}" if org_slug.nil? || team_slug.nil?
-          gh ||= Octokit::Client.new(access_token: config[:gh_access_token], auto_paginate: true)
+          gh ||= Octokit::Client.new(access_token: config[:env][:gh_access_token], auto_paginate: true)
           teams_hash[team_name] = begin
             team = gh.organization_teams(org_slug).select { |t| t[:slug] == team_slug || t[:name].downcase == team_slug.downcase }.first
             team.nil? ? nil : team[:id]

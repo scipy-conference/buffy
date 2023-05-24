@@ -19,14 +19,16 @@ describe RepoChecksResponder do
     it "should define regex" do
       expect(@responder.event_regex).to match("@botsci check repository")
       expect(@responder.event_regex).to match("@botsci check repository    \r\n")
+      expect(@responder.event_regex).to match("@botsci check repository\r\nmore")
       expect(@responder.event_regex).to match("@botsci check repository from branch custom-branch")
+      expect(@responder.event_regex).to match("@botsci check repository from branch custom/branch")
       expect(@responder.event_regex).to match("@botsci check repository from branch development    \r\n")
       expect(@responder.event_regex).to_not match("@botsci check repository from branch ")
     end
   end
 
   describe "#process_message" do
-    let(:expected_locals) { {bot_name: "botsci", issue_author: nil, issue_id: nil, repo: nil, sender: nil} }
+    let(:expected_locals) { {"bot_name" => "botsci", "issue_author" => nil, "issue_id" => nil, "repo" => nil, "sender" => nil} }
 
     it "should respond an error message if no url" do
       @responder.params[:url_field] = "url"
@@ -47,13 +49,14 @@ describe RepoChecksResponder do
     it "should call RepoChecksWorker with custom branch" do
       expected_url = "http://repo.url"
       expected_branch = "custom-branch"
+      expected_locals_with_branch = expected_locals.merge({"match_data_1" => "custom-branch"})
       expected_checks = nil
 
       msg = "@botsci check repository from branch custom-branch"
       @responder.match_data = @responder.event_regex.match(msg)
 
       expect(@responder).to_not receive(:respond).with("I couldn't find the URL for the target repository")
-      expect(RepoChecksWorker).to receive(:perform_async).with(expected_locals, expected_url, expected_branch, expected_checks)
+      expect(RepoChecksWorker).to receive(:perform_async).with(expected_locals_with_branch, expected_url, expected_branch, expected_checks)
       @responder.process_message(msg)
     end
 

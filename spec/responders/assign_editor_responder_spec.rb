@@ -15,8 +15,11 @@ describe AssignEditorResponder do
 
     it "should define regex" do
       expect(@responder.event_regex).to match("@botsci assign @arfon as editor")
-      expect(@responder.event_regex).to match("@botsci assign @xuanxu as editor   \r\n")
+      expect(@responder.event_regex).to match("@botsci assign @xuanxu as editor   ")
+      expect(@responder.event_regex).to match("@botsci assign @xuanxu as editor   \r\n more")
       expect(@responder.event_regex).to match("@botsci assign me as editor")
+      expect(@responder.event_regex).to match("@botsci add me as editor")
+      expect(@responder.event_regex).to match("@botsci add @arfon as editor")
       expect(@responder.event_regex).to_not match("assign @xuanxu as editor")
       expect(@responder.event_regex).to_not match("@botsci assign @xuanxu as editor now")
       expect(@responder.event_regex).to_not match("@botsci assign   as editor")
@@ -81,6 +84,20 @@ describe AssignEditorResponder do
 
     it "should process labels" do
       expect(@responder).to receive(:process_labeling)
+      @responder.process_message(@msg)
+    end
+
+    it "should not process external call if not configured" do
+      expect(@responder).to_not receive(:process_external_service)
+      @responder.process_message(@msg)
+    end
+
+    it "should process external call" do
+      external_call = { url: "https://theoj.org" ,method: "post", query_params: { secret: "A1234567890Z" }, silent: true}
+      @responder.params[:external_call] = external_call
+      expected_locals = @responder.locals.merge({ editor: "@arfon" })
+      expect(@responder).to receive(:process_external_service).with(external_call, expected_locals)
+
       @responder.process_message(@msg)
     end
 

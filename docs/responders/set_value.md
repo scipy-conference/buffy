@@ -35,7 +35,19 @@ Following the previous example if the name of the field is _version_:
 ```eval_rst
 :name: *Required.* The name of the target field in the body of the issue. It can be set using the ``name:`` keyword, or via the name of each instance if there are several instances of this responder specified in the settings file.
 
-:sample_value:  A sample value string for the target field. It is used for documentation purposes when the :doc:`Help responder <./help>` lists all available responders. Default value is **xxxxx**.
+:if_missing: *Optional* Strategy when value placeholders are not defined in the body of the issue. Valid options: `append` (will add the value at the end of the issue body), `prepend` (will add the value at the beginning of the issue body) , `error` (will reply a not-found message). If this param is not present nothing will be done if value placeholder is not found.
+
+:aliased_as: *Optional.* The name of the value to be used in the command, in case it is different from the target field placeholder marked with HTML comments.
+
+:heading: if the value placeholder is missing and the `if_missing` strategy is set to append or prepend, when adding the value it will include this text as heading instead of just the value name.
+
+:sample_value: A sample value string for the target field. It is used for documentation purposes when the :doc:`Help responder <./help>` lists all available responders. Default value is **xxxxx**.
+
+:template_file: *Optional* A template file to use to build the response message (name and value are passed to it).
+
+:external_call: *Optional* Configuration for a external service call. All available subparams are described in the `external_service docs`_.
+
+.. _`external_service docs`: ./external_service.html#params
 ```
 
 ## Examples
@@ -61,6 +73,8 @@ Following the previous example if the name of the field is _version_:
       - archive:
           only: editors
           sample_value: "10.21105/joss.12345"
+          if_missing: prepend
+          heading: "Archive DOI"
       - repository:
           sample_value: "github.com/openjournals/buffy"
 ...

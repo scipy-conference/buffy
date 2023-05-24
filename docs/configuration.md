@@ -18,16 +18,19 @@ buffy:
     help:
     hello:
       hidden: true
-    assign_reviewer_n:
-      only: editors
-    remove_reviewer_n:
-      only: editors
-      no_reviewer_text: "TBD"
     assign_editor:
       only: editors
     remove_editor:
       only: editors
       no_editor_text: "TBD"
+    list_of_values:
+      - reviewers:
+          only: editors
+          if:
+            role_assigned: editor
+            reject_msg: "Can't assign reviewer because there is no editor assigned for this submission yet"
+          sample_value: "@username"
+          add_as_assignee: true
     invite:
       only: eics
     set_value:
@@ -119,12 +122,23 @@ The _env_ section is used to declare general key/value settings. For security re
 
 <dl>
   <dt>hidden</dt>
-  <dd>Defaults to <em>false</em>. If <em>true</em> this responder won't be listed in the help provided to users.</dd>
+  <dd>Defaults to <em>false</em>. If <em>true</em> this responder won't be listed in the help provided to users.
+
+  Usage:
+
+  ```yaml
+    ...
+    secret_responder:
+      hidden: true
+    ...
+
+  ```
+  </dd>
 
   <dt>only</dt>
-  <dd>List of teams (referred by the name used in the <em>teams</em> node) that can have access to the responder. Used to limit access to the responder. If <em>only</em> is not present the responder is considered public and every user in the repository can invoke it.
+  <dd>List of teams (referred by the name used in the <em>teams</em> node) that can have access to the responder. Used to limit access to the responder. If <em>only</em> and <em>authorized_roles_in_issue</em> are not present the responder is considered public and every user in the repository can invoke it.
 
-  Example:
+  Usage:
 
   ```yaml
     public_responder:
@@ -135,7 +149,23 @@ The _env_ section is used to declare general key/value settings. For security re
         - editors
         - reviewers
   ```
+  </dd>
 
+  <dt>authorized_roles_in_issue</dt>
+  <dd>List of values in the body of the issue marked with HTML comments that contains user(s) allowed to run the responder. Used to grant access to the responder per issue. If <em>only</em> and <em>authorized_roles_in_issue</em> are not present the responder is considered public and every user in the repository can invoke it.
+
+  Usage:
+
+
+  ```yaml
+    public_responder:
+    restricted_responder:
+      only: editors
+      authorized_roles_in_issue:
+        - author-handle
+        - reviewers-list
+  ```
+  <em>(restricted_responder can only be called by members of the editors team and by users listed in the issue in the author-handle and reviewers-list HTML-marked fields)</em>
   </dd>
 
   <dt>if</dt>
@@ -144,24 +174,106 @@ The _env_ section is used to declare general key/value settings. For security re
 ```eval_rst
 :title: *<String>* or *<Regular Expresion>* Responder will run only if issue' title matches this.
 :body: *<String>* or *<Regular Expresion>* Responder will run only if the body of the issue matches this.
-:value: *<String>* Responder will run only if there is a value for this in the issue (marked with HTML comments).
+:value_exists: *<String>* Responder will run only if there is a not empty value for this in the issue (marked with HTML comments).
+:value_matches: *<Hash>* Responder will run only if the param values (marked with HTML comments) in the body of the issue matches the ones specified here.
 :role_assigned: *<String>* Responder will be run only if there is a username assigned for the specified value.
+:labels: *<Array>* Responder will be run only if the issue is labeled with all the labels listed here.
+:reject_msg: *<String>* Optional. The response to send as comment if the conditions are not met
 ```
 
-  Example:
+  Usage:
 
   ```yaml
+    # This responder should be invoked only if there's an editor assigned
+    # otherwise will reply with a custom "no editor assigned yet" message
     assign_reviewer:
       if:
         role_assigned: editor
+        reject_msg: I can not do that because there is no editor assigned yet
+
+    # This responder will run only if issue title includes '[PRE-REVIEW]' and if
+    # there is a value for repo-url, ie: <!--repo-url-->whatever<!--end-repo-url-->
     start_review:
       if:
         title: "^\\[PRE-REVIEW\\]"
+        value_exists: repo-url
+
+    # This responder will run only if the value for submission_type in the body of
+    # the issue matches 'astro', ie: <!--submission_type-->astro<!--end-submission_type-->
+    start_review:
+      if:
+        value_matches:
+          submission_type: astro
+
+    # This responder will run only if issue title includes '[REVIEW]' and
+    # the issue is labeled as 'accepted
+    start_review:
+      if:
+        title: "^\\[REVIEW\\]"
+        labels:
+          - accepted
+  ```
+  </dd>
+
+  <dt>description</dt>
+  <dd>Every responder has a default description to be shown using the help_responder. Use this param if you want to use a custom description.
+
+  Usage:
+
+  ```yaml
+    ...
+    custom_responder:
+      description: "This responder do something"
+    ...
+
+  ```
+  </dd>
+
+  <dt>example_invocation</dt>
+  <dd>Every responder defines an example string showing the command to invoke it, to be listed using the help_responder. Use this param if for some reason you want to use a custom value for the example invocation.
+
+  Usage:
+
+  ```yaml
+    ...
+    custom_responder:
+      example_invocation: "@botname run performance checks (please run this only on mondays)"
+    ...
+
   ```
   </dd>
 
 </dl>
 
+A complete example:
+
+```yaml
+  # Two responders are configured here:
+  #
+  # The assign_reviewers responder will respond only when triggered by a user that is
+  # member of any of the editors or editors-in-chief teams. It will also respond only
+  # in issues with the text "[REVIEW]" in its title and that have a not empty value
+  # in its body marked with HTML comments: <!--editor-->@EDITOR_HANDLE<!--end-editor-->
+  # Once invoked, it will label the issue with the 'reviewers-assigned' label.
+  #
+  # The hello responder is configured as hidden, so when calling the help responder the
+  # description and usage example of the hello responder won't be listed in the response.
+  ...
+  responders:
+    assign_reviewers:
+      only:
+        - editors
+        - editors-in-chief
+      if:
+        title: "^\\[REVIEW\\]"
+        role_assigned: editor
+      add_labels:
+        - reviewers-assigned
+      description: "Use this command to assign a reviewers once the editor is assigned"
+    hello:
+      hidden: true
+  ...
+```
 Several responders also allow [adding or removing labels](./labeling).
 
 ### Multiple instances of the same responder

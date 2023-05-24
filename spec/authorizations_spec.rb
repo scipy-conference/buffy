@@ -10,7 +10,7 @@ describe "Authorizations" do
         guests: "orgbuffy/guests",
         trusted_people: ["user33", "user42"],
         empty: nil }]
-    params = { only: ['editors', 'eics', 'trusted_people'] }
+    params = { only: ['editors', 'eics', 'trusted_people'], authorized_roles_in_issue: ['author', 'other-authors', 'reviewers'] }
     Responder.new(settings, params)
   end
 
@@ -38,7 +38,7 @@ describe "Authorizations" do
     describe "when team names received" do
       it "should return ids of all authorized team" do
         subject.params = { only: ['guests'] }
-        expect(subject).to receive(:team_id).once.with("orgbuffy/guests").and_return(44)
+        expect(subject).to receive(:api_team_id).once.with("orgbuffy/guests").and_return(44)
         expect(subject.authorized_team_ids).to eq([44])
       end
     end
@@ -46,7 +46,7 @@ describe "Authorizations" do
     describe "when a mix of ids and names are received" do
       it "should return ids of all authorized team" do
         subject.params = { only: ['editors', 'guests'] }
-        expect(subject).to receive(:team_id).once.with("orgbuffy/guests").and_return(44)
+        expect(subject).to receive(:api_team_id).once.with("orgbuffy/guests").and_return(44)
         expect(subject.authorized_team_ids).to eq([11, 44])
       end
     end
@@ -68,7 +68,7 @@ describe "Authorizations" do
     describe "when all kind of teams are received" do
       it "should return ids of named teams" do
         subject.params = { only: ['reviewers', 'guests', 'trusted_people', 'empty'] }
-        expect(subject).to receive(:team_id).once.with("orgbuffy/guests").and_return(44)
+        expect(subject).to receive(:api_team_id).once.with("orgbuffy/guests").and_return(44)
         expect(subject.authorized_team_ids).to eq([22, 44])
       end
     end
@@ -80,9 +80,15 @@ describe "Authorizations" do
     end
   end
 
-  describe "#authorized_teams_sentence" do
-    it "should return a sentence of names of all authorized teams" do
-      expect(subject.authorized_teams_sentence).to eq('editors, eics and trusted_people')
+  describe "#authorized_roles_names" do
+    it "should return names of all authorized roles from the issue body" do
+      expect(subject.authorized_roles_names).to eq(['author', 'other-authors', 'reviewers'])
+    end
+  end
+
+  describe "#authorized_teams_and_roles_sentence" do
+    it "should return a sentence of names of all authorized teams and roles" do
+      expect(subject.authorized_teams_and_roles_sentence).to eq('editors, eics, trusted_people, author, other-authors and reviewers')
     end
   end
 

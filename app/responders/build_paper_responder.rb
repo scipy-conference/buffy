@@ -16,13 +16,13 @@ class BuildPaperResponder < Responder
     # puts "locals are #{locals}"
     # TODO how do we get the whole payload here?
     # puts "context is #{context}"
-    url = context.payload.dig("issue", "pull_request", "url")
-    # url = context.payload[:issue][:pull_request][:url]
+    url = context.raw_payload.dig("issue", "pull_request", "url")
+    # url = context.raw_payload[:issue][:pull_request][:url]
     # puts "url is #{url}"
     response = Faraday.get(url)
     data = JSON.parse response.body
     # puts "response json is #{data}"
-    user = context.payload.dig("issue", "user", "login")
+    user = context.raw_payload.dig("issue", "user", "login")
     # puts "user is #{user}"
     branch = data["head"]["ref"].gsub("/", "-")
     owner = data["head"]["repo"]["owner"]["login"]

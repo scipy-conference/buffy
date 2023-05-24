@@ -56,17 +56,69 @@ describe PaperFile do
     end
   end
 
+  describe "#bib" do
+    it "should read bibtex file" do
+      expect(subject).to receive(:bibtex_path).twice.and_return(fixture("paper.bib"))
+      bib = subject.bib
+      expect(bib.data.size).to eq(6)
+      expect(bib.errors).to be_empty
+      expect(bib.data.first.title.value).to eq("The NumPy Array: A Structure for Efficient Numerical Computation")
+    end
+
+    it "should find lexical errors" do
+      expect(subject).to receive(:bibtex_path).twice.and_return(fixture("paper_with_errors.bib"))
+
+      level = BibTeX.log.level
+      BibTeX.log.level = "ERROR"
+      bib = subject.bib
+      BibTeX.log.level = level
+
+      expect(bib.errors).to_not be_empty
+      expect(bib.errors.size).to eq(2)
+      expect(bib.errors.first.content).to match(/@article{numpy/)
+      expect(bib.errors.last.content).to match(/@article{matplotlib/)
+    end
+  end
+
   describe "#bibtex_entries" do
     it "should read bibtex file" do
-      expect(subject).to receive(:bibtex_path).and_return(fixture("paper.bib"))
+      expect(subject).to receive(:bibtex_path).twice.and_return(fixture("paper.bib"))
       bibtex_entries = subject.bibtex_entries
-      expect(bibtex_entries.size).to eq(5)
+      expect(bibtex_entries.size).to eq(6)
       expect(bibtex_entries.first.title.value).to eq("The NumPy Array: A Structure for Efficient Numerical Computation")
+      expect(bibtex_entries.first.author.value).to eq("van der Walt, S. and Colbert, S. C. and Varoquaux, G.")
+      expect(bibtex_entries.first.doi.value).to eq("10.1109/MCSE.2011.37")
+      expect(subject.bibtex_error).to be_nil
+    end
+
+    it "should parse latex except for doi field" do
+      expect(subject).to receive(:bibtex_path).twice.and_return(fixture("paper.bib"))
+      bibtex_entries = subject.bibtex_entries
+      expect(bibtex_entries.size).to eq(6)
+      expect(bibtex_entries.last.title.value).to eq("The LaTeX test: A Structure")
+      expect(bibtex_entries.last.author.value).to eq("PArsed, S. and Van–Hall, S. C. and Varo, G.")
+      expect(bibtex_entries.last.doi.value).to eq("10.1109/MCSE.2011--37")
+      expect(bibtex_entries.last.pages.value).to eq("22–30")
+      expect(subject.bibtex_error).to be_nil
     end
 
     it "should be empty if errors parsing the file" do
       expect(BibTeX).to receive(:open).and_raise BibTeX::ParseError
       expect(subject.bibtex_entries).to eq([])
+    end
+
+    it "should set bibtex_error if lexical errors found" do
+      expect(subject).to receive(:bibtex_path).twice.and_return(fixture("paper_with_errors.bib"))
+
+      level = BibTeX.log.level
+      BibTeX.log.level = "ERROR"
+      bibtex_entries = subject.bibtex_entries
+      BibTeX.log.level = level
+
+      expect(bibtex_entries.size).to eq(4)
+      expect(subject.bibtex_error).to_not be_nil
+      expect(subject.bibtex_error).to match(/@article{numpy/)
+      expect(subject.bibtex_error).to match(/@article{matplotlib/)
     end
   end
 
