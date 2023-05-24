@@ -10,7 +10,7 @@ class CheckReferencesResponder < Responder
   end
 
   def process_message(message)
-    url = context.payload.dig("issue", "pull_request", "url")
+    url = context.raw_payload.dig("issue", "pull_request", "url")
     response = Faraday.get(url)
     data = JSON.parse response.body
     branch_name_value = data["head"]["ref"]
