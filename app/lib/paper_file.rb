@@ -73,12 +73,17 @@ class PaperFile
     paper_path = nil
 
     if Dir.exist? search_path
-      Find.find(search_path).each do |path|
+      # currently, SciPy supports LaTeX and reStructuredText
+      Dir.glob(search_path + '/papers/*/*').each do |path|
         # the example papers are 00_texderwalt and 00_bibderwalt
-        unless path.include?("00_texderwalt") || path.include?("00_bibderwalt")
-          # currently, SciPy supports LaTeX and reStructuredText
-          if path =~ /papers.*\.tex$|papers.*\.rst$/
-            puts "found paper path #{path}"
+        unless path.include?("papers/00_texderwalt/") || path.include?("papers/00_bibderwalt/")
+          if path =~ /.*\.tex$/
+            puts "found tex paper path #{path}"
+            paper_path = path
+            break
+          end
+          if path =~ /.*\.rst$/
+            puts "found rst paper path #{path}"
             paper_path = path
             break
           end
